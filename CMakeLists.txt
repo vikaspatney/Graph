@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.10)
+﻿# CMakeList.txt : fichier projet CMake de niveau supérieur, effectuez une configuration globale
+# et incluez les sous-projets ici.
+#
+cmake_minimum_required (VERSION 3.8)
 
-# set the project name
-project(Michelin)
+project ("Graph")
 
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-add_subdirectory(graph) 
-
+# Incluez les sous-projets.
+add_subdirectory ("graph")

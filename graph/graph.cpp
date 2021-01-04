@@ -1,92 +1,110 @@
-// Michelin.cpp : Ce fichier contient la fonction 'main'. L'exécution du programme commence et se termine à cet endroit.
+﻿// CMakeProjGraph.cpp : définit le point d'entrée de l'application.
 //
 
-#include <iostream>
+#include "CMakeProjGraph.h"
+
 using namespace std;
 
-// stores adjacency list items
-struct adjNode {
-    int val, cost;
-    adjNode* next;
-};
+typedef struct nodes {
+    int dest;
+    int cost;
+}node;
 
-// structure to store edges
-struct graphEdge {
-    int start_ver, end_ver, weight;
-};
+class Graph {
+    int n;
+    list<node>* adjList;
+private:
+    void showList(int src, list<node> lt) {
+        list<node> ::iterator i;
+        node tempNode;
 
-class DiaGraph {
-    // insert new nodes into adjacency list from given graph
-    adjNode* getAdjListNode(int value, int weight, adjNode* head) {
-        adjNode* newNode = new adjNode;
-        newNode->val = value;
-        newNode->cost = weight;
-
-        newNode->next = head;   // point new node to current head
-        return newNode;
+        for (i = lt.begin(); i != lt.end(); i++) {
+            tempNode = *i;
+            cout << "(" << src << ")---(" << tempNode.dest << "|" << tempNode.cost << ") ";
+        }
+        cout << endl;
     }
-    int N;  // number of nodes in the graph
 public:
-    adjNode** head;                //adjacency list as array of pointers
-    // Constructor
-    DiaGraph(graphEdge edges[], int n, int N) {
-        // allocate new node
-        head = new adjNode * [N]();
-        this->N = N;
-        // initialize head pointer for all vertices
-        for (int i = 0; i < N; ++i)
-            head[i] = nullptr;
-        // construct directed graph by adding edges to it
-        for (unsigned i = 0; i < n; i++) {
-            int start_ver = edges[i].start_ver;
-            int end_ver = edges[i].end_ver;
-            int weight = edges[i].weight;
-            // insert in the beginning
-            adjNode* newNode = getAdjListNode(end_ver, weight, head[start_ver]);
+    Graph() {
+        n = 0;
+        adjList = nullptr;
+    }
 
-            // point head pointer to new node
-            head[start_ver] = newNode;
+    Graph(int nodeCount) {
+        n = nodeCount;
+        adjList = new list<node>[n];
+    }
+
+    void addEdge(int source, int dest, int cost) {
+        node newNode;
+        newNode.dest = dest;
+        newNode.cost = cost;
+        adjList[source].push_back(newNode);
+    }
+
+    void displayEdges() {
+        for (int i = 0; i < n; i++) {
+            list<node> tempList = adjList[i];
+            showList(i, tempList);
         }
     }
-    // Destructor
-    ~DiaGraph() {
-        for (int i = 0; i < N; i++)
-            delete[] head[i];
-        delete[] head;
-    }
+
+    friend void dijkstra(Graph g, int* dist, int* prev, int start);
 };
 
-// print all adjacent vertices of given vertex
-void display_AdjList(adjNode* ptr, int i)
-{
-    while (ptr != nullptr) {
-        cout << "(" << i << ", " << ptr->val
-            << ", " << ptr->cost << ") ";
-        ptr = ptr->next;
+void dijkstra(Graph g, int* dist, int* prev, int start) {
+    int n = g.n;
+
+    for (int u = 0; u < n; u++) {
+        dist[u] = 9999;   //set as infinity
+        prev[u] = -1;    //undefined previous
     }
-    cout << endl;
+
+    dist[start] = 0;   //distance of start is 0
+    set<int> S;       //create empty set S
+    list<int> Q;
+
+    for (int u = 0; u < n; u++) {
+        Q.push_back(u);    //add each node into queue
+    }
+
+    while (!Q.empty()) {
+        list<int> ::iterator i;
+        i = min_element(Q.begin(), Q.end());
+        int u = *i; //the minimum element from queue
+        Q.remove(u);
+        S.insert(u); //add u in the set
+        list<node> ::iterator it;
+
+        for (it = g.adjList[u].begin(); it != g.adjList[u].end(); it++) {
+            if ((dist[u] + (it->cost)) < dist[it->dest]) { //relax (u,v)
+                dist[it->dest] = (dist[u] + (it->cost));
+                prev[it->dest] = u;
+            }
+        }
+    }
 }
 
-// graph implementation
-int main()
-{
-    // graph edges array.
-    graphEdge edges[] = {
-        // (x, y, w) -> edge from x to y with weight w
-        {0,3,80.2},{0,4,126.5},{1,3,30.8}, {1,4,5.3}, {3,2,30.7}
-    };
-    int N = 5;      // Number of vertices in the graph
-    // calculate number of edges
-    int n = sizeof(edges) / sizeof(edges[0]);
-    // construct graph
-    DiaGraph diagraph(edges, n, N);
-    // print adjacency list representation of graph
-    cout << "Graph adjacency list " << endl << "(start_vertex, end_vertex, weight):" << endl;
-    for (int i = 0; i < N; i++)
-    {
-        // display adjacent vertices of vertex i
-        display_AdjList(diagraph.head[i], i);
-    }
-    return 0;
-}
+int main() {
+    int n = 4;
+    Graph g(n);
+    int dist[4], prev[4];
+    int start = 0;
 
+    g.addEdge(0, 3, 80.2);
+    g.addEdge(0, 4, 126.5);
+    g.addEdge(1, 3, 30.8);
+    g.addEdge(1, 4, 5.3);
+    g.addEdge(2, 3, 30.7);
+
+    g.addEdge(3, 0, 80.2);
+    g.addEdge(3, 1, 30.8);
+    g.addEdge(3, 2, 30.7);
+
+
+    dijkstra(g, dist, prev, start);
+
+    for (int i = 0; i < n; i++)
+        if (i != start)
+            cout << start << " to " << i << ", Cost: " << dist[i] << " Previous: " << prev[i] << endl;
+}

@@ -1,4 +1,4 @@
-add_library(Graph graph.cpp)
-add_executable (graph graph.cpp)
+cmake_minimum_required (VERSION 3.8)
 
-target_include_directories (Graph PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_executable (graph "graph.cpp" "graph.h")
+
