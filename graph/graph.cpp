@@ -1,7 +1,7 @@
 ﻿// CMakeProjGraph.cpp : définit le point d'entrée de l'application.
 //
 
-#include "CMakeProjGraph.h"
+#include "graph.h"
 
 using namespace std;
 
